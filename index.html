@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter Squad | AI Meeting Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- Header with theme toggle -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="header-title">Meet your new<br><span class="gradient-text">AI Meeting Assistant</span></h1>
+                    <p class="header-subtitle">Transform meeting transcripts into actionable insights. Paste text or drop a file to get started.</p>
+                </div>
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                    🌙
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <!-- Unified Input Section -->
+            <section id="input-section" class="input-section">
+                <div class="input-card">
+                    
+                    <!-- Primary Input Area -->
+                    <div class="input-area">
+                        <div class="input-container">
+                            <textarea 
+                                id="transcript-input" 
+                                class="transcript-input" 
+                                placeholder="Paste your meeting transcript here, or drag and drop a file...
+
+Example: 'John: We need to finalize the Q3 report by Friday. Sarah, can you handle that?'"
+                                aria-label="Meeting transcript input"
+                            ></textarea>
+                            
+                            <!-- File Drop Overlay -->
+                            <div id="upload-area" class="upload-overlay">
+                                <div class="upload-content">
+                                    <div class="upload-icon">📁</div>
+                                    <p>Drop your .txt, .vtt, or .srt file here</p>
+                                    <span class="upload-hint">or</span>
+                                    <button id="file-select-btn" class="file-select-btn">Choose File</button>
+                                </div>
+                            </div>
+                            
+                            <input type="file" id="file-input" accept=".txt,.vtt,.srt" hidden>
+                        </div>
+                        
+                        <!-- File Info -->
+                        <div id="file-info" class="file-info hidden"></div>
+                    </div>
+
+                    <!-- Advanced Options (Progressive Disclosure) -->
+                    <div id="advanced-options" class="advanced-options hidden">
+                        <div class="options-grid">
+                            <div class="form-group">
+                                <label for="analysis-type">Analysis Type</label>
+                                <select id="analysis-type" class="form-select">
+                                    <option value="general">General Meeting</option>
+                                    <option value="standup">Daily Standup</option>
+                                    <option value="planning">Planning Session</option>
+                                    <option value="retrospective">Retrospective</option>
+                                    <option value="client">Client Meeting</option>
+                                    <option value="brainstorm">Brainstorming</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="participants">Participants (optional)</label>
+                                <input type="text" id="participants" class="form-input" placeholder="John, Sarah, Mike...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="input-footer">
+                        <button id="process-btn" class="process-btn">
+                            <span class="button-icon">✨</span>
+                            <span class="button-text">Analyze Meeting</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="results-section" class="results-section hidden">
+                
+                <!-- Loading State -->
+                <div id="loading-spinner" class="loading-state hidden">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Hunter Squad is hunting insights in the wild...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="error-message" class="error-state hidden"></div>
+
+                <!-- Results Grid (Bento Layout) -->
+                <div id="output" class="results-container">
+                    <!-- Results will be dynamically inserted here -->
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- Email Share Modal -->
+        <div id="email-modal" class="modal hidden">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Share via Email</h3>
+                    <button class="modal-close" id="close-email-modal" aria-label="Close modal">
+                        ✕
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="recipient-email">Recipient Email</label>
+                        <input type="email" id="recipient-email" class="form-input" placeholder="colleague@company.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email-subject">Subject</label>
+                        <input type="text" id="email-subject" class="form-input" value="Meeting Analysis Summary" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="include-pdf" checked>
+                            <span class="checkmark"></span>
+                            Include PDF attachment
+                        </label>
+                    </div>
+                    <button id="send-email-btn" class="btn-primary">Send Email</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Event Modal -->
+        <div id="calendar-modal" class="modal hidden">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create Follow-up Meeting</h3>
+                    <button class="modal-close" id="close-calendar-modal" aria-label="Close modal">
+                        ✕
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="event-title">Meeting Title</label>
+                        <input type="text" id="event-title" class="form-input" placeholder="Follow-up Meeting" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-date">Date & Time</label>
+                        <input type="datetime-local" id="event-date" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-duration">Duration (minutes)</label>
+                        <input type="number" id="event-duration" class="form-input" value="60" min="15" max="480">
+                    </div>
+                    <div class="form-group">
+                        <label for="event-attendees">Attendees (comma-separated emails)</label>
+                        <input type="text" id="event-attendees" class="form-input" placeholder="john@company.com, sarah@company.com">
+                    </div>
+                    <button id="create-event-btn" class="btn-primary">Create Calendar Event</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Made with ❤️ by Hunter Squad</p>
+        </footer>
+
+    </div>
+
+    <!-- Load the unified script -->
+    <script src="app.js"></script>
+</body>
+</html> 

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter Squad | AI Meeting Assistant - Test</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- Header with theme toggle -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="header-title">Meet your new<br><span class="gradient-text">AI Meeting Assistant</span></h1>
+                    <p class="header-subtitle">Transform meeting transcripts into actionable insights. Paste text or drop a file to get started.</p>
+                </div>
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                    🌙
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <!-- Unified Input Section -->
+            <section id="input-section" class="input-section">
+                <div class="input-card">
+                    
+                    <!-- Primary Input Area -->
+                    <div class="input-area">
+                        <div class="input-container">
+                            <textarea 
+                                id="transcript-input" 
+                                class="transcript-input" 
+                                placeholder="Paste your meeting transcript here, or drag and drop a file...
+
+Example: 'John: We need to finalize the Q3 report by Friday. Sarah, can you handle that?'"
+                                aria-label="Meeting transcript input"
+                            ></textarea>
+                            
+                            <!-- File Drop Overlay -->
+                            <div id="upload-area" class="upload-overlay">
+                                <div class="upload-content">
+                                    <div class="upload-icon">📁</div>
+                                    <p>Drop your .txt, .vtt, or .srt file here</p>
+                                    <span class="upload-hint">or</span>
+                                    <button id="file-select-btn" class="file-select-btn">Choose File</button>
+                                </div>
+                            </div>
+                            
+                            <input type="file" id="file-input" accept=".txt,.vtt,.srt" hidden>
+                        </div>
+                        
+                        <!-- File Info -->
+                        <div id="file-info" class="file-info hidden"></div>
+                    </div>
+
+                    <!-- Advanced Options (Progressive Disclosure) -->
+                    <div id="advanced-options" class="advanced-options hidden">
+                        <div class="options-grid">
+                            <div class="form-group">
+                                <label for="analysis-type">Analysis Type</label>
+                                <select id="analysis-type" class="form-select">
+                                    <option value="general">General Meeting</option>
+                                    <option value="standup">Daily Standup</option>
+                                    <option value="planning">Planning Session</option>
+                                    <option value="retrospective">Retrospective</option>
+                                    <option value="client">Client Meeting</option>
+                                    <option value="brainstorm">Brainstorming</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="participants">Participants (optional)</label>
+                                <input type="text" id="participants" class="form-input" placeholder="John, Sarah, Mike...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="input-footer">
+                        <button id="process-btn" class="process-btn">
+                            <span class="button-icon">✨</span>
+                            <span class="button-text">Analyze Meeting</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="results-section" class="results-section hidden">
+                
+                <!-- Loading State -->
+                <div id="loading-spinner" class="loading-state hidden">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Hunter Squad is hunting insights in the wild...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="error-message" class="error-state hidden"></div>
+
+                <!-- Results Grid (Bento Layout) -->
+                <div id="output" class="results-container">
+                    <!-- Results will be dynamically inserted here -->
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Made with ❤️ by Hunter Squad</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // Simple standalone implementation for testing
+        class SimpleApp {
+            constructor() {
+                this.currentTheme = localStorage.getItem('theme') || 'light';
+                this.currentFile = null;
+                this.init();
+            }
+
+            init() {
+                this.applyTheme();
+                this.setupEventListeners();
+                console.log('🎯 Simple test app initialized successfully!');
+            }
+
+            setupEventListeners() {
+                // Theme toggle
+                const themeToggle = document.getElementById('theme-toggle');
+                if (themeToggle) {
+                    themeToggle.addEventListener('click', () => this.toggleTheme());
+                }
+
+                // Input handling
+                const transcriptInput = document.getElementById('transcript-input');
+                if (transcriptInput) {
+                    transcriptInput.addEventListener('input', () => this.handleInputChange());
+                }
+
+                // Process button
+                const processBtn = document.getElementById('process-btn');
+                if (processBtn) {
+                    processBtn.addEventListener('click', () => this.handleProcess());
+                }
+
+                // File handling
+                const fileSelectBtn = document.getElementById('file-select-btn');
+                const fileInput = document.getElementById('file-input');
+                if (fileSelectBtn && fileInput) {
+                    fileSelectBtn.addEventListener('click', () => fileInput.click());
+                    fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+                }
+            }
+
+            toggleTheme() {
+                this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+                this.applyTheme();
+                localStorage.setItem('theme', this.currentTheme);
+            }
+
+            applyTheme() {
+                document.documentElement.setAttribute('data-theme', this.currentTheme);
+                const themeToggle = document.getElementById('theme-toggle');
+                if (themeToggle) {
+                    themeToggle.textContent = this.currentTheme === 'dark' ? '☀️' : '🌙';
+                }
+            }
+
+            handleInputChange() {
+                const transcriptInput = document.getElementById('transcript-input');
+                const advancedOptions = document.getElementById('advanced-options');
+                
+                if (transcriptInput && advancedOptions) {
+                    const hasContent = transcriptInput.value.trim().length > 0;
+                    if (hasContent && advancedOptions.classList.contains('hidden')) {
+                        advancedOptions.classList.remove('hidden');
+                    } else if (!hasContent && !advancedOptions.classList.contains('hidden')) {
+                        advancedOptions.classList.add('hidden');
+                    }
+                }
+            }
+
+            handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    this.currentFile = file;
+                    const fileInfo = document.getElementById('file-info');
+                    if (fileInfo) {
+                        fileInfo.innerHTML = `
+                            <div class="file-info-content">
+                                <span class="file-name">${file.name}</span>
+                                <span class="file-size">${this.formatFileSize(file.size)}</span>
+                            </div>
+                        `;
+                        fileInfo.classList.remove('hidden');
+                    }
+                    
+                    // Clear text input and show advanced options
+                    const transcriptInput = document.getElementById('transcript-input');
+                    if (transcriptInput) {
+                        transcriptInput.value = '';
+                    }
+                    this.handleInputChange();
+                }
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            async handleProcess() {
+                const transcriptInput = document.getElementById('transcript-input');
+                const text = transcriptInput ? transcriptInput.value.trim() : '';
+                
+                if (!text && !this.currentFile) {
+                    this.showError('Please provide a transcript or upload a file before analyzing.');
+                    return;
+                }
+
+                this.showLoading(true);
+
+                // Simulate API call
+                setTimeout(() => {
+                    this.showLoading(false);
+                    this.displayTestResults();
+                }, 2000);
+            }
+
+            showLoading(isLoading) {
+                const resultsSection = document.getElementById('results-section');
+                const loadingSpinner = document.getElementById('loading-spinner');
+                const outputContainer = document.getElementById('output');
+                const errorMessage = document.getElementById('error-message');
+                const processBtn = document.getElementById('process-btn');
+                const processBtnText = document.querySelector('.button-text');
+
+                if (resultsSection) resultsSection.classList.remove('hidden');
+                if (loadingSpinner) loadingSpinner.classList.toggle('hidden', !isLoading);
+                if (outputContainer) outputContainer.classList.toggle('hidden', isLoading);
+                if (errorMessage) errorMessage.classList.add('hidden');
+                if (processBtn) processBtn.disabled = isLoading;
+                if (processBtnText) processBtnText.textContent = isLoading ? 'Analyzing...' : 'Analyze Meeting';
+            }
+
+            showError(message) {
+                const resultsSection = document.getElementById('results-section');
+                const loadingSpinner = document.getElementById('loading-spinner');
+                const outputContainer = document.getElementById('output');
+                const errorMessage = document.getElementById('error-message');
+
+                if (resultsSection) resultsSection.classList.remove('hidden');
+                if (loadingSpinner) loadingSpinner.classList.add('hidden');
+                if (outputContainer) outputContainer.classList.add('hidden');
+                if (errorMessage) {
+                    errorMessage.textContent = message;
+                    errorMessage.classList.remove('hidden');
+                }
+            }
+
+            displayTestResults() {
+                const outputContainer = document.getElementById('output');
+                if (!outputContainer) return;
+
+                // Sample test data
+                const testResults = {
+                    summary: "This was a productive team meeting where we discussed project progress, identified key blockers, and made important decisions for the upcoming sprint.",
+                    action_items: [
+                        {
+                            task: "Finalize the Q3 report",
+                            assignee: "Sarah",
+                            priority: "High",
+                            deadline: "Friday"
+                        },
+                        {
+                            task: "Review user feedback",
+                            assignee: "Mike",
+                            priority: "Medium",
+                            deadline: "Next week"
+                        }
+                    ],
+                    key_decisions: [
+                        "Approved the new design system",
+                        "Decided to postpone feature X to next quarter",
+                        "Agreed on weekly check-ins"
+                    ],
+                    next_steps: [
+                        "Schedule follow-up meeting",
+                        "Prepare presentation for stakeholders",
+                        "Update project timeline"
+                    ]
+                };
+
+                outputContainer.innerHTML = '';
+                
+                const bentoGrid = document.createElement('div');
+                bentoGrid.className = 'bento-grid';
+                
+                // Create test cards
+                this.createTestCard(bentoGrid, 'Summary', '📄', testResults.summary, 'large');
+                this.createActionItemsCard(bentoGrid, testResults.action_items);
+                this.createListCard(bentoGrid, 'Key Decisions', '🛡️', testResults.key_decisions, 'small');
+                this.createListCard(bentoGrid, 'Next Steps', '➡️', testResults.next_steps, 'small');
+                
+                outputContainer.appendChild(bentoGrid);
+                
+                const resultsSection = document.getElementById('results-section');
+                if (resultsSection) {
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+
+            createTestCard(container, title, icon, content, size = 'medium') {
+                const card = document.createElement('div');
+                card.className = `bento-card ${size}`;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-icon">${icon}</div>
+                        <h3 class="card-title">${title}</h3>
+                    </div>
+                    <div class="card-content">
+                        <p>${content}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+
+            createActionItemsCard(container, actionItems) {
+                const card = document.createElement('div');
+                card.className = 'bento-card medium action-items-card';
+                
+                const itemsHtml = actionItems.map((item, index) => `
+                    <div class="action-item" data-index="${index}">
+                        <div class="action-item-header">
+                            <input type="checkbox" id="action-${index}" class="action-checkbox">
+                            <label for="action-${index}" class="action-text">${item.task}</label>
+                            <span class="priority-badge priority-${item.priority.toLowerCase()}">${item.priority}</span>
+                        </div>
+                        <div class="action-details">
+                            <span class="assignee">👤 ${item.assignee}</span>
+                            <span class="deadline">📅 ${item.deadline}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-icon">✅</div>
+                        <h3 class="card-title">Action Items</h3>
+                        <span class="item-count">${actionItems.length}</span>
+                    </div>
+                    <div class="card-content">
+                        ${itemsHtml}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            }
+
+            createListCard(container, title, icon, items, size = 'medium') {
+                const card = document.createElement('div');
+                card.className = `bento-card ${size}`;
+                
+                const itemsHtml = `<ul>${items.map(item => `<li>${item}</li>`).join('')}</ul>`;
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-icon">${icon}</div>
+                        <h3 class="card-title">${title}</h3>
+                        <span class="item-count">${items.length}</span>
+                    </div>
+                    <div class="card-content">
+                        ${itemsHtml}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new SimpleApp();
+        });
+    </script>
+</body>
+</html> 
