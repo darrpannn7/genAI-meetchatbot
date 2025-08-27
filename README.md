@@ -1,0 +1,2 @@
+https://hunter-squad-oy7d.vercel.app/
+an AI-powered meeting assistant designed to transform raw meeting transcripts into actionable insights, enhancing team productivity and alignment. By leveraging generative AI and large language models (LLMs), it automatically generates concise summaries, identifies key decisions, and assigns action items with deadlines and owners. The output is formatted for seamless integration with tools like Slack, email, Notion, and Google Docs.
